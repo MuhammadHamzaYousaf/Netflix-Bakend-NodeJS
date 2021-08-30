@@ -1,5 +1,4 @@
 const router= require('express').Router();
-const { reset } = require('nodemon');
 const List= require('../models/List');
 const verify=require('../verifyToken');
 
@@ -40,28 +39,30 @@ router.delete('/:_id',verify,async (req,res)=>{
 
 // Get List 10 Movies
 
-router.get('/',verify,(req,res)=>{
+router.get('/',verify,async (req,res)=>{
     const typeQuery=req.query.type;
     const genreQuery=req.query.genre;
     let list=[];
     try {
+        
         if(typeQuery){
             if(genreQuery){
                 list=await List.aggregate([
-                    {$sample:{$size:10}},
+                    {$sample:{size:10}},
                     {$match:{type:typeQuery,genre:genreQuery}}
                 ])
             }
             else{
                 list=await List.aggregate([
-                    {$sample:{$size:10}},
+                    {$sample:{size:10}},
                     {$match:{type:typeQuery}}
                 ])
             }
         }
         else{
+            
             list = await List.aggregate([
-                {$sample:{$size:10}}
+                {$sample:{size:10}}
             ])
         }
         res.status(200).json(list);
