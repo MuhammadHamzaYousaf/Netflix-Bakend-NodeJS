@@ -36,7 +36,7 @@ router.put('/:_id',verify,async (req,res)=>{
 router.delete('/:_id',verify,async (req,res)=>{
     if(req.user._id===req.params._id || req.user.isAdmin){
         try {
-            const deleteUser =await findByIdAndDelete(req.params._id);
+            const deleteUser =await User.findByIdAndDelete(req.params._id);
             res.status(200).json(`Deleted Account Successfully`);
         } catch (error) {
             res.status(500).json(error);
@@ -78,7 +78,42 @@ router.get('/',verify,async (req,res)=>{
 })
 // Get User Stats
 
+router.get('/stats',async (req,res)=>{
+    const today=new Date();
+    const lastyear = today.setFullYear(today.setFullYear()-1);
+    const monthArray=[
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+    ];
 
+    try {
+        const data =await User.aggregate([
+            {
+                $project:{
+                    month:{$month:"$createdAt"}
+                }
+            },{
+                $group:{
+                    _id:"$month",
+                    total:{$sum:1}
+                }
+            }
+        ]);
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+})
 
 
 module.exports=router;
